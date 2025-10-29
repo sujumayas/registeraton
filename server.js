@@ -317,6 +317,16 @@ function broadcast(data) {
   });
 }
 
+// ====== CONFIGURATION ENDPOINT ======
+
+// Serve Supabase configuration to frontend
+app.get('/api/config', (req, res) => {
+  res.json({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  });
+});
+
 // ====== EVENT MANAGEMENT ENDPOINTS ======
 
 // Get all active events

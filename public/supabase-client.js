@@ -2,49 +2,75 @@
  * Supabase Client Configuration
  *
  * This file initializes and exports the Supabase client for use throughout the application.
- * It uses environment variables (injected at build time by Netlify) for configuration.
- *
- * For local development:
- * 1. Copy .env.example to .env.local
- * 2. Fill in your Supabase URL and anon key
- * 3. Use a local dev server that loads environment variables
+ * It fetches configuration from the server API endpoint.
  */
 
-// For production (Netlify), these are injected at build time
-// For local development, you'll need to replace these with actual values
-// or use a build tool that injects environment variables
+// Store initialization promise for other modules to wait on
+let initPromise = null;
+let supabaseClient = null;
 
-const SUPABASE_URL = window.ENV?.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+// Initialize Supabase client by fetching config from server
+initPromise = (async function initSupabase() {
+  try {
+    // Fetch config from server
+    // Try Netlify Functions endpoint first (for production), then local API (for development)
+    let response = await fetch('/.netlify/functions/config');
 
-// Validate configuration
-if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-  console.error('Supabase URL is not configured. Please set SUPABASE_URL environment variable.');
-}
+    if (!response.ok) {
+      // Fallback to local API endpoint
+      response = await fetch('/api/config');
+    }
 
-if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-  console.error('Supabase anon key is not configured. Please set SUPABASE_ANON_KEY environment variable.');
-}
+    if (!response.ok) {
+      throw new Error(`Failed to fetch config: ${response.statusText}`);
+    }
 
-// Initialize Supabase client
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage
+    const config = await response.json();
+    const SUPABASE_URL = config.supabaseUrl;
+    const SUPABASE_ANON_KEY = config.supabaseAnonKey;
+
+    // Validate configuration
+    if (!SUPABASE_URL) {
+      console.error('Supabase URL is not configured. Please set NEXT_PUBLIC_SUPABASE_URL environment variable.');
+      throw new Error('Supabase URL is not configured');
+    }
+
+    if (!SUPABASE_ANON_KEY) {
+      console.error('Supabase anon key is not configured. Please set NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable.');
+      throw new Error('Supabase anon key is not configured');
+    }
+
+    // Initialize Supabase client using the CDN library
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    });
+
+    // Export for use in other modules
+    window.supabase = supabaseClient;
+
+    console.log('Supabase client initialized successfully');
+    return supabaseClient;
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+    throw error;
   }
-});
+})();
 
-// Export for use in other modules
-window.supabase = supabase;
+// Export initialization promise
+window.supabaseReady = initPromise;
 
 /**
  * Helper: Check if user is authenticated
  * @returns {Promise<boolean>}
  */
 async function isAuthenticated() {
-  const { data: { session } } = await supabase.auth.getSession();
+  await window.supabaseReady;
+  const { data: { session } } = await window.supabase.auth.getSession();
   return !!session;
 }
 
@@ -53,7 +79,8 @@ async function isAuthenticated() {
  * @returns {Promise<Object|null>}
  */
 async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
+  await window.supabaseReady;
+  const { data: { user } } = await window.supabase.auth.getUser();
   return user;
 }
 
@@ -62,10 +89,11 @@ async function getCurrentUser() {
  * @returns {Promise<Object|null>}
  */
 async function getUserProfile() {
+  await window.supabaseReady;
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const { data, error } = await supabase
+  const { data, error } = await window.supabase
     .from('users')
     .select('*')
     .eq('id', user.id)
@@ -84,6 +112,7 @@ async function getUserProfile() {
  * @returns {Promise<boolean>}
  */
 async function isAdmin() {
+  await window.supabaseReady;
   const profile = await getUserProfile();
   return profile?.role === 'admin';
 }
@@ -92,6 +121,7 @@ async function isAdmin() {
  * Helper: Redirect to login if not authenticated
  */
 async function requireAuth() {
+  await window.supabaseReady;
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     window.location.href = '/login.html';
@@ -104,6 +134,7 @@ async function requireAuth() {
  * Helper: Redirect to login if not admin
  */
 async function requireAdmin() {
+  await window.supabaseReady;
   const authenticated = await requireAuth();
   if (!authenticated) return false;
 
