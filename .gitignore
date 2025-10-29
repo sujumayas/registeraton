@@ -1,0 +1,8 @@
+node_modules/
+participants.db
+participants.db-shm
+participants.db-wal
+.DS_Store
+npm-debug.log*
+.env
+uploads/

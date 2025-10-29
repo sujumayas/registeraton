@@ -1,0 +1,25 @@
+{
+  "name": "event-registration",
+  "version": "2.0.0",
+  "description": "Multi-tenant event participant registration system with Supabase",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "netlify deploy --prod"
+  },
+  "keywords": ["registration", "event", "participants", "supabase", "netlify"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "xlsx": "^0.18.5",
+    "parse-multipart-data": "^1.5.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

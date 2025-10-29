@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Registration</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="notifications.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Compact Header -->
+    <header class="compact-header">
+      <div class="header-left">
+        <div class="event-context">
+          <a href="/events.html" class="back-link">← Back to Events</a>
+          <h1 id="eventName">Event Registration</h1>
+          <p id="eventDate" class="event-date-display"></p>
+        </div>
+        <div class="stats-inline">
+          <span class="stat-item">Registered: <strong id="totalCount">0</strong></span>
+          <span class="stat-item" id="preregStats" style="display: none;">Pending: <strong id="preregPendingCount">0</strong></span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-setup" id="setupBtn">⚙️ Setup</button>
+      </div>
+    </header>
+
+    <!-- Setup Panel (Collapsible) -->
+    <div class="setup-panel" id="setupPanel" style="display: none;">
+      <div class="setup-content">
+        <h3>Setup Pre-Registration</h3>
+        <div class="upload-container">
+          <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" style="display: none;">
+          <button class="btn-upload" onclick="document.getElementById('excelFile').click()">
+            Choose Excel File
+          </button>
+          <span id="fileName" class="file-name"></span>
+          <button id="uploadBtn" class="btn-primary" style="display: none;">Process File with AI</button>
+        </div>
+        <div id="uploadProgress" class="upload-progress" style="display: none;">
+          <div class="progress-text">Processing file with AI...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-button active" data-tab="search">Pre-Registration Search</button>
+      <button class="tab-button" data-tab="registered">Registered Participants</button>
+    </div>
+
+    <!-- Main Registration Area -->
+    <div class="registration-area">
+      <!-- Search Tab Content -->
+      <div class="tab-content active" id="searchTab">
+        <!-- Large Search Box -->
+        <div class="search-header">
+          <input type="text" id="preregSearchInput" class="search-main" placeholder="🔍 Type name, email, or DNI to search..." autofocus>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results-container">
+          <table id="preregisterTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="name">
+                  Name <span class="sort-arrow"></span>
+                </th>
+                <th class="sortable" data-sort="email">
+                  Email / DNI <span class="sort-arrow"></span>
+                </th>
+                <th class="sortable" data-sort="area">
+                  Area <span class="sort-arrow"></span>
+                </th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="preregisterBody">
+              <tr class="no-results">
+                <td colspan="4">Type to search or click Setup to upload participant list</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Registered Tab Content -->
+      <div class="tab-content" id="registeredTab">
+        <div class="registered-header">
+          <h2>All Registered Participants</h2>
+          <div class="registered-search">
+            <input type="text" id="registeredSearchInput" placeholder="Search registered participants..." class="search-input">
+          </div>
+        </div>
+
+        <div class="results-container">
+          <table id="registeredTable">
+            <thead>
+              <tr>
+                <th class="sortable-reg" data-sort="name">
+                  Name <span class="sort-arrow"></span>
+                </th>
+                <th class="sortable-reg" data-sort="email">
+                  Email <span class="sort-arrow"></span>
+                </th>
+                <th class="sortable-reg" data-sort="area">
+                  Area <span class="sort-arrow"></span>
+                </th>
+                <th class="sortable-reg" data-sort="time">
+                  Registered <span class="sort-arrow"></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="registeredBody">
+              <tr class="no-results">
+                <td colspan="4">No registered participants yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Quick Add Button -->
+    <button class="fab" id="fabBtn" title="Add person not in list">+</button>
+
+    <!-- Quick Add Modal -->
+    <div class="modal" id="quickAddModal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add New Participant</h3>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <form id="quickAddForm">
+          <div class="form-group">
+            <input type="text" id="quickName" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="quickEmail" placeholder="Email" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="quickArea" placeholder="Area" required list="areaOptions">
+            <datalist id="areaOptions">
+              <option value="Engineering">
+              <option value="Sales">
+              <option value="Marketing">
+              <option value="HR">
+              <option value="Finance">
+              <option value="Operations">
+              <option value="Product">
+              <option value="Design">
+              <option value="Support">
+              <option value="Other">
+            </datalist>
+          </div>
+          <button type="submit" class="btn-primary">Add Participant</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="auth.js"></script>
+  <script src="notifications.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

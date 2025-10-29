@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Event Registration System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="notifications.css">
+  <style>
+    /* Login-specific styles */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      font-size: 28px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-actions {
+      margin-top: 24px;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-login:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .form-footer {
+      margin-top: 20px;
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .form-footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .form-content {
+      display: none;
+    }
+
+    .form-content.active {
+      display: block;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Event Registration</h1>
+        <p>Sign in to manage your events</p>
+      </div>
+
+      <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="signin">Sign In</button>
+        <button class="tab-btn" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <div class="form-content active" id="signin-form">
+        <form id="signin">
+          <div class="form-group">
+            <label for="signin-email">Email</label>
+            <input type="email" id="signin-email" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="signin-password">Password</label>
+            <input type="password" id="signin-password" required autocomplete="current-password">
+          </div>
+          <div class="error-message" id="signin-error"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-login" id="signin-btn">
+              Sign In
+            </button>
+          </div>
+        </form>
+        <div class="form-footer">
+          <a href="#" id="forgot-password">Forgot password?</a>
+        </div>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div class="form-content" id="signup-form">
+        <form id="signup">
+          <div class="form-group">
+            <label for="signup-name">Full Name</label>
+            <input type="text" id="signup-name" required autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" required autocomplete="new-password" minlength="6">
+          </div>
+          <div class="form-group">
+            <label for="signup-confirm-password">Confirm Password</label>
+            <input type="password" id="signup-confirm-password" required autocomplete="new-password" minlength="6">
+          </div>
+          <div class="error-message" id="signup-error"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-login" id="signup-btn">
+              Create Account
+            </button>
+          </div>
+        </form>
+        <div class="form-footer">
+          <p style="font-size: 13px; color: var(--text-secondary);">
+            New accounts are created with Assistant role by default.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="auth.js"></script>
+  <script src="notifications.js"></script>
+
+  <script>
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const formContents = document.querySelectorAll('.form-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+
+        // Update active tab button
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update active form
+        formContents.forEach(form => form.classList.remove('active'));
+        document.getElementById(`${tab}-form`).classList.add('active');
+
+        // Clear errors
+        document.querySelectorAll('.error-message').forEach(el => {
+          el.classList.remove('show');
+          el.textContent = '';
+        });
+      });
+    });
+
+    // Check if already authenticated
+    (async () => {
+      if (await window.supabaseHelpers.isAuthenticated()) {
+        window.location.href = '/events.html';
+      }
+    })();
+
+    // Sign In Form
+    document.getElementById('signin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+      const button = document.getElementById('signin-btn');
+      const errorEl = document.getElementById('signin-error');
+
+      // Clear previous errors
+      errorEl.classList.remove('show');
+      errorEl.textContent = '';
+
+      // Disable button and show loading
+      button.disabled = true;
+      button.innerHTML = '<span class="loading-spinner"></span> Signing in...';
+
+      try {
+        const { user, error } = await window.auth.signIn(email, password);
+
+        if (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.add('show');
+          NotificationManager.error('Sign in failed: ' + error.message);
+        } else {
+          NotificationManager.success('Welcome back!');
+          setTimeout(() => {
+            window.location.href = '/events.html';
+          }, 500);
+        }
+      } catch (error) {
+        errorEl.textContent = 'An unexpected error occurred';
+        errorEl.classList.add('show');
+        NotificationManager.error('Sign in failed');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = 'Sign In';
+      }
+    });
+
+    // Sign Up Form
+    document.getElementById('signup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fullName = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+      const button = document.getElementById('signup-btn');
+      const errorEl = document.getElementById('signup-error');
+
+      // Clear previous errors
+      errorEl.classList.remove('show');
+      errorEl.textContent = '';
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      // Validate password length
+      if (password.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      // Disable button and show loading
+      button.disabled = true;
+      button.innerHTML = '<span class="loading-spinner"></span> Creating account...';
+
+      try {
+        const { user, error } = await window.auth.signUp(email, password, fullName, 'assistant');
+
+        if (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.add('show');
+          NotificationManager.error('Sign up failed: ' + error.message);
+        } else {
+          NotificationManager.success('Account created! Please check your email to confirm.');
+          // Switch to sign in tab
+          document.querySelector('.tab-btn[data-tab="signin"]').click();
+          // Clear form
+          document.getElementById('signup').reset();
+        }
+      } catch (error) {
+        errorEl.textContent = 'An unexpected error occurred';
+        errorEl.classList.add('show');
+        NotificationManager.error('Sign up failed');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = 'Create Account';
+      }
+    });
+
+    // Forgot Password
+    document.getElementById('forgot-password').addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('signin-email').value;
+
+      if (!email) {
+        NotificationManager.warning('Please enter your email address first');
+        return;
+      }
+
+      const { error } = await window.auth.resetPassword(email);
+
+      if (error) {
+        NotificationManager.error('Failed to send reset email: ' + error.message);
+      } else {
+        NotificationManager.success('Password reset email sent! Check your inbox.');
+      }
+    });
+  </script>
+</body>
+</html>

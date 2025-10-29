@@ -1,0 +1,76 @@
+# Netlify Configuration for Event Registration System
+
+[build]
+  # Publish directory (static files)
+  publish = "public"
+
+  # Functions directory
+  functions = "netlify/functions"
+
+  # Build command (no build step needed for static site)
+  command = "echo 'No build required'"
+
+# Redirect all routes to index.html for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+  # Don't apply redirect to actual files and API routes
+  conditions = {path = ["!*.js", "!*.css", "!*.png", "!*.jpg", "!*.svg", "!*.ico", "!*.html", "!/.netlify/*"]}
+
+# Headers for security and CORS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Environment variable injection (for local development)
+# Production env vars should be set in Netlify dashboard
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "staging"
+
+[context.dev.environment]
+  NODE_ENV = "development"
+
+# Function configuration
+[functions]
+  # Increase function timeout for AI processing (default is 10s, max is 26s for free tier)
+  # For Pro tier, you can set up to 60s
+  node_bundler = "esbuild"
+
+[[functions."process-excel"]]
+  included_files = ["node_modules/@anthropic-ai/**/*", "node_modules/xlsx/**/*"]
