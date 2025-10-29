@@ -254,6 +254,15 @@
   <script src="notifications.js"></script>
 
   <script>
+    // Helper function to safely call NotificationManager
+    function showNotification(message, type = 'info') {
+      if (window.NotificationManager && typeof window.NotificationManager[type] === 'function') {
+        window.NotificationManager[type](message);
+      } else {
+        console.log(`[${type.toUpperCase()}] ${message}`);
+      }
+    }
+
     // Tab switching
     const tabButtons = document.querySelectorAll('.tab-btn');
     const formContents = document.querySelectorAll('.form-content');
@@ -308,9 +317,9 @@
         if (error) {
           errorEl.textContent = error.message;
           errorEl.classList.add('show');
-          NotificationManager.error('Sign in failed: ' + error.message);
+          showNotification('Sign in failed: ' + error.message, 'error');
         } else {
-          NotificationManager.success('Welcome back!');
+          showNotification('Welcome back!', 'success');
           setTimeout(() => {
             window.location.href = '/events.html';
           }, 500);
@@ -318,7 +327,7 @@
       } catch (error) {
         errorEl.textContent = 'An unexpected error occurred';
         errorEl.classList.add('show');
-        NotificationManager.error('Sign in failed');
+        showNotification('Sign in failed', 'error');
       } finally {
         button.disabled = false;
         button.innerHTML = 'Sign In';
@@ -364,9 +373,9 @@
         if (error) {
           errorEl.textContent = error.message;
           errorEl.classList.add('show');
-          NotificationManager.error('Sign up failed: ' + error.message);
+          showNotification('Sign up failed: ' + error.message, 'error');
         } else {
-          NotificationManager.success('Account created! Please check your email to confirm.');
+          showNotification('Account created! Please check your email to confirm.', 'success');
           // Switch to sign in tab
           document.querySelector('.tab-btn[data-tab="signin"]').click();
           // Clear form
@@ -375,7 +384,7 @@
       } catch (error) {
         errorEl.textContent = 'An unexpected error occurred';
         errorEl.classList.add('show');
-        NotificationManager.error('Sign up failed');
+        showNotification('Sign up failed', 'error');
       } finally {
         button.disabled = false;
         button.innerHTML = 'Create Account';
@@ -389,16 +398,16 @@
       const email = document.getElementById('signin-email').value;
 
       if (!email) {
-        NotificationManager.warning('Please enter your email address first');
+        showNotification('Please enter your email address first', 'warning');
         return;
       }
 
       const { error } = await window.auth.resetPassword(email);
 
       if (error) {
-        NotificationManager.error('Failed to send reset email: ' + error.message);
+        showNotification('Failed to send reset email: ' + error.message, 'error');
       } else {
-        NotificationManager.success('Password reset email sent! Check your inbox.');
+        showNotification('Password reset email sent! Check your inbox.', 'success');
       }
     });
   </script>
