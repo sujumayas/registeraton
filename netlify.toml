@@ -72,5 +72,5 @@
   # For Pro tier, you can set up to 60s
   node_bundler = "esbuild"
 
-[[functions."process-excel"]]
+[functions."process-excel"]
   included_files = ["node_modules/@anthropic-ai/**/*", "node_modules/xlsx/**/*"]
