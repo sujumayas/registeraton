@@ -137,4 +137,3 @@ Participant data is stored in `participants.db` (SQLite). The database is create
 - File size limit (10MB)
 - API key stored in `.env` (not committed to git)
 - Input validation on all endpoints
-# registeraton
