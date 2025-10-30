@@ -8,16 +8,23 @@
     "build": "echo 'No build step required for static site'",
     "deploy": "netlify deploy --prod"
   },
-  "keywords": ["registration", "event", "participants", "supabase", "netlify"],
+  "keywords": [
+    "registration",
+    "event",
+    "participants",
+    "supabase",
+    "netlify"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
-    "xlsx": "^0.18.5",
-    "parse-multipart-data": "^1.5.0"
+    "parse-multipart-data": "^1.5.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "netlify-cli": "^17.0.0"
+    "netlify-cli": "^17.0.0",
+    "supabase": "^2.54.11"
   },
   "engines": {
     "node": ">=18.0.0"
