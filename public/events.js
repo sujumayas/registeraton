@@ -32,20 +32,40 @@ async function loadUserInfo() {
     currentUser = await window.supabaseHelpers.getCurrentUser();
     userProfile = await window.supabaseHelpers.getUserProfile();
 
-    // Display user info in header
-    const userInfoEl = document.getElementById('userInfo');
-    if (userInfoEl && userProfile) {
-      userInfoEl.innerHTML = `
-        <span class="user-name">${escapeHtml(userProfile.full_name)}</span>
-        <span class="user-role">${escapeHtml(userProfile.role)}</span>
-        <button class="btn-secondary" onclick="handleSignOut()">Sign Out</button>
-      `;
+    if (!userProfile) return;
+
+    // Get user initials for avatar
+    const initials = userProfile.full_name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+
+    // Update user menu trigger
+    document.getElementById('userInitials').textContent = initials;
+    const userName = document.querySelector('.user-details .user-name');
+    const userRole = document.querySelector('.user-details .user-role');
+    if (userName) userName.textContent = userProfile.full_name;
+    if (userRole) userRole.textContent = userProfile.role;
+
+    // Update dropdown menu
+    const dropdownName = document.getElementById('dropdownUserName');
+    const dropdownEmail = document.getElementById('dropdownUserEmail');
+    if (dropdownName) dropdownName.textContent = userProfile.full_name;
+    if (dropdownEmail) dropdownEmail.textContent = currentUser.email;
+
+    // Update welcome message
+    const welcomeMsg = document.getElementById('welcomeMessage');
+    const firstName = userProfile.full_name.split(' ')[0];
+    if (welcomeMsg) {
+      welcomeMsg.textContent = `Welcome back, ${firstName}!`;
     }
 
     // Show/hide create button based on role
     const createBtn = document.getElementById('createEventBtn');
-    if (createBtn && userProfile.role !== 'admin') {
-      createBtn.style.display = 'none';
+    if (createBtn && userProfile.role === 'admin') {
+      createBtn.style.display = 'flex';
     }
   } catch (error) {
     console.error('Error loading user info:', error);
@@ -123,8 +143,19 @@ async function loadEvents() {
 function renderEvents() {
   const grid = document.getElementById('eventsGrid');
 
+  // Update event count
+  const eventCountEl = document.getElementById('eventCount');
+  if (eventCountEl) {
+    const count = events.length;
+    eventCountEl.textContent = `${count} event${count !== 1 ? 's' : ''}`;
+  }
+
   if (events.length === 0) {
-    grid.innerHTML = '<div class="no-events">No events yet. Click "Create New Event" to get started.</div>';
+    const isAdmin = userProfile?.role === 'admin';
+    const message = isAdmin
+      ? 'No events yet. Click "Create New Event" to get started.'
+      : 'No events available. Contact your administrator to create events.';
+    grid.innerHTML = `<div class="no-events">${message}</div>`;
     return;
   }
 
@@ -229,6 +260,24 @@ function setupEventHandlers() {
   const deleteModalClose = document.getElementById('deleteModalClose');
   const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  const userMenuTrigger = document.getElementById('userMenuTrigger');
+  const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+  // User menu dropdown toggle
+  if (userMenuTrigger && userMenuDropdown) {
+    userMenuTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = userMenuDropdown.style.display === 'block';
+      userMenuDropdown.style.display = isVisible ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!userMenuTrigger.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+        userMenuDropdown.style.display = 'none';
+      }
+    });
+  }
 
   // Create event button
   if (createBtn) {

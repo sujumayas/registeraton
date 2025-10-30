@@ -11,20 +11,75 @@
 <body>
   <div class="container">
     <!-- Header -->
-    <header class="events-header">
-      <div>
+    <header class="app-header">
+      <div class="app-title">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
+          <path d="M16 8L20 12H18V18H20L16 24L12 20H14V14H12L16 8Z" fill="white"/>
+          <defs>
+            <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#667eea"/>
+              <stop offset="1" stop-color="#764ba2"/>
+            </linearGradient>
+          </defs>
+        </svg>
         <h1>Event Management</h1>
       </div>
-      <div class="header-actions">
-        <div id="userInfo" class="user-info"></div>
-        <button class="btn-primary" id="createEventBtn">+ Create New Event</button>
+      <div class="user-menu">
+        <button class="user-menu-trigger" id="userMenuTrigger">
+          <div class="user-avatar" id="userAvatar">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="user-details" id="userDetails">
+            <span class="user-name">Loading...</span>
+            <span class="user-role">...</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="user-menu-dropdown" id="userMenuDropdown" style="display: none;">
+          <div class="user-menu-header">
+            <div class="user-menu-info">
+              <div class="user-menu-name" id="dropdownUserName">Loading...</div>
+              <div class="user-menu-email" id="dropdownUserEmail">...</div>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-item" onclick="handleSignOut()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+              <path d="M6 14H3.333A1.333 1.333 0 0 1 2 12.667V3.333A1.333 1.333 0 0 1 3.333 2H6M10.667 11.333L14 8m0 0L10.667 4.667M14 8H6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Sign Out
+          </button>
+        </div>
       </div>
     </header>
 
-    <!-- Events Grid -->
-    <div class="events-grid" id="eventsGrid">
-      <div class="loading">Loading events...</div>
-    </div>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <h2 id="welcomeMessage">Welcome back!</h2>
+        <p class="hero-subtitle">Manage your events and track participant registrations</p>
+      </div>
+      <button class="btn-primary btn-create" id="createEventBtn" style="display: none;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M10 4v12M4 10h12" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Create New Event
+      </button>
+    </section>
+
+    <!-- Events Section -->
+    <section class="events-section">
+      <div class="section-header">
+        <h3>All Events</h3>
+        <div class="event-count" id="eventCount">0 events</div>
+      </div>
+      <div class="events-grid" id="eventsGrid">
+        <div class="loading">Loading events...</div>
+      </div>
+    </section>
   </div>
 
   <!-- Create/Edit Event Modal -->

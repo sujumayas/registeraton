@@ -6,3 +6,9 @@ participants.db-wal
 npm-debug.log*
 .env
 uploads/
+
+# Pre-register example files (Excel templates and samples)
+pre-register-examples/
+
+# Local Netlify folder
+.netlify
