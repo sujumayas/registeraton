@@ -82,21 +82,37 @@ function initializeRealtime() {
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'events' },
       (payload) => {
-        console.log('Event created:', payload);
-        events.unshift(payload.new);
-        renderEvents();
-        window.NotificationManager.success('Event created successfully!');
+        console.log('Event created via realtime:', payload);
+        // Check if event already exists (to avoid duplicates from optimistic updates)
+        const exists = events.some(e => e.id === payload.new.id);
+        if (!exists && !payload.new.is_deleted) {
+          events.unshift(payload.new);
+          renderEvents();
+        }
       }
     )
     .on(
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'events' },
       (payload) => {
-        console.log('Event updated:', payload);
+        console.log('Event updated via realtime:', payload);
         const index = events.findIndex(e => e.id === payload.new.id);
-        if (index !== -1) {
-          events[index] = payload.new;
-          renderEvents();
+
+        // If event is now deleted, remove it from the array
+        if (payload.new.is_deleted) {
+          if (index !== -1) {
+            events.splice(index, 1);
+            renderEvents();
+          }
+        } else {
+          // Update existing event or add if not found
+          if (index !== -1) {
+            events[index] = payload.new;
+            renderEvents();
+          } else {
+            events.unshift(payload.new);
+            renderEvents();
+          }
         }
       }
     )
@@ -104,10 +120,13 @@ function initializeRealtime() {
       'postgres_changes',
       { event: 'DELETE', schema: 'public', table: 'events' },
       (payload) => {
-        console.log('Event deleted:', payload);
-        events = events.filter(e => e.id !== payload.old.id);
-        renderEvents();
-        window.NotificationManager.success('Event deleted successfully');
+        console.log('Event deleted via realtime:', payload);
+        // Check if event exists before removing (to avoid errors from optimistic updates)
+        const exists = events.some(e => e.id === payload.old.id);
+        if (exists) {
+          events = events.filter(e => e.id !== payload.old.id);
+          renderEvents();
+        }
       }
     )
     .subscribe((status) => {
@@ -389,9 +408,10 @@ async function handleFormSubmit(e) {
     description: document.getElementById('eventDescription').value.trim() || null
   };
 
-  // Add created_by for new events
+  // Add created_by and organization_id for new events
   if (!isEditing) {
     eventData.created_by = currentUser.id;
+    eventData.organization_id = userProfile.organization_id;
   }
 
   try {
@@ -407,6 +427,13 @@ async function handleFormSubmit(e) {
 
       if (error) throw error;
       result = data;
+
+      // Update local state immediately (optimistic update)
+      const index = events.findIndex(e => e.id === currentEventId);
+      if (index !== -1) {
+        events[index] = result;
+        renderEvents();
+      }
     } else {
       const { data, error } = await window.supabase
         .from('events')
@@ -416,6 +443,10 @@ async function handleFormSubmit(e) {
 
       if (error) throw error;
       result = data;
+
+      // Add to local state immediately (optimistic update)
+      events.unshift(result);
+      renderEvents();
     }
 
     closeModal();
@@ -472,7 +503,12 @@ async function confirmDelete() {
 
     if (error) throw error;
 
+    // Remove from local state immediately (optimistic update)
+    events = events.filter(e => e.id !== currentEventId);
+    renderEvents();
+
     closeDeleteModal();
+    window.NotificationManager.success('Event deleted successfully');
   } catch (error) {
     console.error('Error deleting event:', error);
     window.NotificationManager.error(error.message || 'Failed to delete event');
